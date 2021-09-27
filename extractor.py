@@ -5,6 +5,8 @@ from tkinter.filedialog import askopenfilename
 from PIL import Image
 import pytesseract
 import textract
+import os
+import pdfplumber
 root = Tk()
 
 # layout and background.
@@ -13,22 +15,7 @@ background_label = tkinter.Label(root, image=background_image)
 background_label.place(relwidth=1,relheight=1)
 
 # functions for the buttons in the software
-def pdf_reader():
-    paths = PathTextBox.get( '1.0', 'end-1c' )
-    images = convert_from_path(paths)
-    print(paths)
-    for i, image in enumerate(images):
-        fname = 'image'+str(i)+'.png'
-        image.save(fname, "PNG")
-        text2 = pytesseract.image_to_string( 'image1.png')
-        ResultTextBox.delete('1.0', END)
-        ResultTextBox.insert(END, text2)
-        def write():
-            # write output to txt file
-            file = open( 'output.txt', 'w' )
-            file.write( ResultTextBox.get( '1.0', 'end-1c' ) )
-            file.close()
-        write()
+
 def readfromimage():
     path = PathTextBox.get( '1.0', 'end-1c' )
     if path:
@@ -63,6 +50,22 @@ def docx_reader():
         file.write( ResultTextBox.get( '1.0', 'end-1c' ) )
         file.close()
     write()
+def get_pdf_name():
+    pathe = PathTextBox.get( '1.0', 'end-1c' )
+    with pdfplumber.open(pathe) as pdf:
+        page = pdf.pages[0]
+        text = page.extract_text()
+    os.system(f'ocrmypdf {pathe} output.pdf')
+    with pdfplumber.open('output.pdf') as pdf:
+        page = pdf.pages[0]
+        text = page.extract_text(x_tolerance=2)
+    ResultTextBox.delete('1.0', END)
+    ResultTextBox.insert(END, text)
+    def write():
+        file = open( 'output.txt', 'w' )
+        file.write( ResultTextBox.get( '1.0', 'end-1c' ) )
+        file.close()
+    write()
 
 
 Title = root.title( "Southampton" )
@@ -82,8 +85,10 @@ DataLabel.grid( row=6, column=1, sticky=(W) )
 # Buttons in the software.
 BrowseButton = Button( root, text="Find File Path", command=OpenFile )
 BrowseButton.grid( row=2, column=2 )
-BrowseButton2 = Button( root, text="Extract Text From Pdf ", command=pdf_reader)
+
+BrowseButton2 = Button( root, text="Extract Text From Pdf ", command=get_pdf_name)
 BrowseButton2.grid( row=3, column=2 )
+
 
 ReadButton = Button( root, text="Extract Text From Image", command=readfromimage)
 ReadButton.grid( row=5, column=2 )
@@ -95,5 +100,14 @@ PathTextBox = Text( root, height=2 )
 PathTextBox.grid( row=4, column=1, columnspan=2 )
 ResultTextBox = Text( root, height=6 )
 ResultTextBox.grid( row=7, column=1, columnspan=2 )
+
+
+
+
+
+
+
+
+
 
 root.mainloop()
