@@ -1,5 +1,4 @@
 import tkinter
-from pdf2image import convert_from_path
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from PIL import Image
@@ -100,13 +99,6 @@ PathTextBox = Text( root, height=2 )
 PathTextBox.grid( row=4, column=1, columnspan=2 )
 ResultTextBox = Text( root, height=6 )
 ResultTextBox.grid( row=7, column=1, columnspan=2 )
-
-
-
-
-
-
-
 
 
 
